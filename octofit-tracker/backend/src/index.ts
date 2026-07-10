@@ -4,6 +4,7 @@ import { User, Team, Activity, LeaderboardEntry, Workout } from './models';
 
 const app = express();
 const port = Number(process.env.PORT || 8000);
+const host = process.env.HOST || '0.0.0.0';
 
 app.use(express.json());
 
@@ -43,8 +44,8 @@ app.use('/api/leaderboard', createResourceRoute('leaderboard', LeaderboardEntry)
 app.use('/api/workouts', createResourceRoute('workouts', Workout));
 
 connectToDatabase().then(() => {
-  app.listen(port, () => {
-    console.log(`Backend listening on port ${port}`);
+  app.listen(port, host, () => {
+    console.log(`Backend listening on ${host}:${port}`);
     console.log(`API base URL: ${getApiBaseUrl()}`);
   });
 });

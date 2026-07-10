@@ -8,6 +8,7 @@ const database_1 = __importDefault(require("./config/database"));
 const models_1 = require("./models");
 const app = (0, express_1.default)();
 const port = Number(process.env.PORT || 8000);
+const host = process.env.HOST || '0.0.0.0';
 app.use(express_1.default.json());
 const getApiBaseUrl = () => {
     const codespaceName = process.env.CODESPACE_NAME;
@@ -37,8 +38,8 @@ app.use('/api/activities', createResourceRoute('activities', models_1.Activity))
 app.use('/api/leaderboard', createResourceRoute('leaderboard', models_1.LeaderboardEntry));
 app.use('/api/workouts', createResourceRoute('workouts', models_1.Workout));
 (0, database_1.default)().then(() => {
-    app.listen(port, () => {
-        console.log(`Backend listening on port ${port}`);
+    app.listen(port, host, () => {
+        console.log(`Backend listening on ${host}:${port}`);
         console.log(`API base URL: ${getApiBaseUrl()}`);
     });
 });
