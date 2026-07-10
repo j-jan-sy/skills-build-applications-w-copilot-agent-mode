@@ -1,26 +1,50 @@
 import express from 'express';
-import mongoose from 'mongoose';
+import connectToDatabase from './config/database';
+import { User, Team, Activity, LeaderboardEntry, Workout } from './models';
 
 const app = express();
-const port = process.env.PORT || 8000;
+const port = Number(process.env.PORT || 8000);
 
 app.use(express.json());
 
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok' });
-});
-
-const start = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/octofit_db');
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-  }
-
-  app.listen(port, () => {
-    console.log(`Backend listening on port ${port}`);
-  });
+const getApiBaseUrl = () => {
+  const codespaceName = process.env.CODESPACE_NAME;
+  return codespaceName ? `https://${codespaceName}-8000.app.github.dev` : 'http://localhost:8000';
 };
 
-start();
+const createResourceRoute = <T>(resourceName: string, model: any) => {
+  const router = express.Router();
+
+  router.get('/', async (_req, res) => {
+    const items = await model.find({}).lean();
+    res.json({ resource: resourceName, items });
+  });
+
+  router.post('/', async (req, res) => {
+    const item = await model.create(req.body);
+    res.status(201).json(item);
+  });
+
+  return router;
+};
+
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', apiBaseUrl: getApiBaseUrl() });
+});
+
+app.get('/', (_req, res) => {
+  res.json({ message: 'Octofit Tracker API', apiBaseUrl: getApiBaseUrl() });
+});
+
+app.use('/api/users', createResourceRoute('users', User));
+app.use('/api/teams', createResourceRoute('teams', Team));
+app.use('/api/activities', createResourceRoute('activities', Activity));
+app.use('/api/leaderboard', createResourceRoute('leaderboard', LeaderboardEntry));
+app.use('/api/workouts', createResourceRoute('workouts', Workout));
+
+connectToDatabase().then(() => {
+  app.listen(port, () => {
+    console.log(`Backend listening on port ${port}`);
+    console.log(`API base URL: ${getApiBaseUrl()}`);
+  });
+});
