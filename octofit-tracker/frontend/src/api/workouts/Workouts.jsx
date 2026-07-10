@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getApiBaseUrl } from '../utils/api';
+import { getApiBaseUrl } from '../../utils/api';
 
 export default function Workouts() {
   const [workouts, setWorkouts] = useState([]);

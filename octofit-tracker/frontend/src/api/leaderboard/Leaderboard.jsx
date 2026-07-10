@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getApiBaseUrl } from '../utils/api';
+import { getApiBaseUrl } from '../../utils/api';
 
 export default function Leaderboard() {
   const [entries, setEntries] = useState([]);
